@@ -1,6 +1,7 @@
 gpiozero==1.6.2
 numpy==1.19.5
 Pillow==8.1.2
+PyYAML==6.0.2
 RPi.GPIO==0.7.0
 smbus==1.1.post2
 spidev==3.5
