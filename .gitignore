@@ -1,6 +1,9 @@
 # Local configuration for this application
 config.yaml
 
+# Externally downloaded assets. This is for images, etc. needed for the project but shouldn't be uploaded to the repo for various licensing reasons.
+external
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
