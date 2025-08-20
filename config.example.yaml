@@ -1,2 +1,9 @@
 waveshare:
-  dir: ''
+  dir: /install/dir/for/e-Paper
+weather:
+  apiKey: ''
+  locations:
+    - id: newyork
+      name: 'New York, NY'
+      query: 'New York,NY,US'
+
