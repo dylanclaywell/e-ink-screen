@@ -4,11 +4,12 @@ import sys
 import os
 import yaml
 import RPi.GPIO as GPIO
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 from weather import OpenWeather
 from config import Config
 from logger import Logger
+from files import Files
 
 with open('config.yaml', 'r') as stream:
     try:
@@ -31,27 +32,36 @@ for location in locations:
     Logger.info(f"Adding location {location.get('name')} to list of weather locations")
     weather.add_location(location)
 
-curWeather = weather.poll_location('fishers')
-
-img = weather.get_weather_code_img(curWeather.get('weather')[0].get('icon'))
-
 # early exit for testing things other than display
 # exit()
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
+Logger.debug("Initializing EPD")
+
 epd = epd2in13_V3.EPD()
 epd.init()
+
+Logger.debug("Clearing screen")
 
 # Clear screen
 epd.Clear(0xFF)
 
+Logger.debug("Creating background image")
+
 # Create image
 image = Image.new('1', (epd.height, epd.width), 255)
 
-# Draw (paste) weather image onto image, using the weather image's alpha channel as a bitmask
-image.paste(img, (10, 10), img)
+# Draw weather
+weather.draw(image)
+
+Logger.debug("Loading PICO-8 shortcuts image")
+
+# pico8shortcutsImage = Files.load_pico8_shortcut_image()
+# image.paste(pico8shortcutsImage, (0, 0), pico8shortcutsImage)
+
+Logger.debug("Displaying final image")
 
 # Display image
 epd.display(epd.getbuffer(image))

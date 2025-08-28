@@ -49,3 +49,7 @@ class Files:
 
         return Image.open(path)
 
+    @staticmethod
+    def load_pico8_shortcut_image():
+        return Image.open("./assets/pico8/shortcuts-1.png")
+
