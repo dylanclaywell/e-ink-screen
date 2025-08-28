@@ -83,7 +83,7 @@ class OpenWeather:
 
         weatherImage = self.get_weather_code_img(curWeather.get('weather')[0].get('icon'))
 
-        image.paste(weatherImage, (0, 48), weatherImage)
+        image.paste(weatherImage, (2, 48), weatherImage)
 
         weatherFontHeading = ImageFont.truetype("./assets/fonts/Roboto-Regular.ttf", 16)
         weatherFontDate = ImageFont.truetype("./assets/fonts/Roboto-Regular.ttf", 12)
