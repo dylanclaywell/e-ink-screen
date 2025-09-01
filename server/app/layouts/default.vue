@@ -8,7 +8,7 @@
         </div>
       </div>
     </nav>
-    <div class="overflow-auto min-h-[calc(100vh-72px)]">
+    <div class="overflow-auto min-h-[calc(100vh-72px)] max-w-7xl mx-auto px-4">
       <main class="py-8"><slot /></main>
     </div>
   </div>

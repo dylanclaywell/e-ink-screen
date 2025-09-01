@@ -20,12 +20,7 @@
       />
     </tbody>
   </table>
-  <button
-    class="mt-4 text-blue-500 border-2 border-blue-600 hover:bg-blue-100 rounded px-4 py-2 w-full"
-    @click="$emit('addRow')"
-  >
-    Add Row
-  </button>
+  <button class="mt-4 button--primary" @click="$emit('addRow')">Add Row</button>
 </template>
 
 <script lang="ts" setup>

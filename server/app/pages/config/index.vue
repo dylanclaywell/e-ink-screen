@@ -1,7 +1,6 @@
 <template>
   <div>
     <h1 class="text-2xl">Configs</h1>
-    {{ status }}
     <table>
       <thead>
         <tr>
@@ -26,5 +25,5 @@
 </template>
 
 <script lang="ts" setup>
-const { data, status } = await useFetch('/api/config')
+const { data } = await useFetch('/api/config')
 </script>
