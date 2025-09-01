@@ -12,6 +12,34 @@
         ref="canvasContainerRef"
         class="w-full border relative overflow-hidden"
       >
+        <div class="toolbar flex gap-4 p-2 bg-gray-100">
+          <label>
+            Cursor Size:
+            <input
+              v-model="cursorSize"
+              type="number"
+              class="p-2 border"
+              min="1"
+              max="50"
+            />
+          </label>
+          <button
+            class="p-2 bg-gray-300 rounded flex items-center gap-2"
+            title="Square Cursor"
+            type="button"
+            @click="() => setCursorType('square')"
+          >
+            <Icon name="mdi-square" />
+          </button>
+          <button
+            class="p-2 bg-gray-300 rounded flex items-center gap-2"
+            title="Circle Cursor"
+            type="button"
+            @click="() => setCursorType('circle')"
+          >
+            <Icon name="mdi-circle" />
+          </button>
+        </div>
         <canvas ref="canvasRef"></canvas>
         <div
           class="absolute bottom-0 left-0 bg-gray-800 text-white text-sm px-2 py-1"
@@ -46,6 +74,12 @@ const gridData: (string | null)[][] = Array.from({ length: gridWidth }, () =>
   Array(gridHeight).fill(null),
 )
 const cursorPosition = ref({ x: 0, y: 0 })
+const cursorSize = ref(5)
+const cursorType = ref<'square' | 'circle'>('square')
+
+function setCursorType(type: 'square' | 'circle') {
+  cursorType.value = type
+}
 
 function resizeCanvas() {
   if (canvasContainerRef.value && canvasRef.value) {
@@ -114,7 +148,6 @@ function startDrawing(event: MouseEvent) {
   if (event.button === 0) isDrawing.value = true
   if (event.button === 2) isErasing.value = true
 
-  // Draw immediately at the mouse's current position
   const { x, y } = getCanvasCoordinates(event)
   const gridX = Math.floor(x / (canvasRef.value!.width / gridWidth))
   const gridY = Math.floor(y / (canvasRef.value!.height / gridHeight))
@@ -126,11 +159,31 @@ function startDrawing(event: MouseEvent) {
     gridY < gridHeight &&
     gridData[gridX]
   ) {
-    gridData[gridX][gridY] = isDrawing.value ? '#000000' : null
+    const size = cursorSize.value
+    for (let dx = -Math.floor(size / 2); dx <= Math.floor(size / 2); dx++) {
+      for (let dy = -Math.floor(size / 2); dy <= Math.floor(size / 2); dy++) {
+        const nx = gridX + dx
+        const ny = gridY + dy
+        if (
+          nx >= 0 &&
+          nx < gridWidth &&
+          ny >= 0 &&
+          ny < gridHeight &&
+          gridData[nx]
+        ) {
+          if (
+            cursorType.value === 'circle' &&
+            dx * dx + dy * dy > (size / 2) * (size / 2)
+          ) {
+            continue
+          }
+          gridData[nx][ny] = isDrawing.value ? '#000000' : null
+        }
+      }
+    }
     drawCanvas()
   }
 
-  // Set the last position to the current position
   lastPanPosition.value = { x: gridX, y: gridY }
 }
 
@@ -144,7 +197,6 @@ function draw(event: MouseEvent) {
   if (gridX < 0 || gridX >= gridWidth || gridY < 0 || gridY >= gridHeight)
     return
 
-  // Interpolate between the last position and the current position
   const lastX = lastPanPosition.value.x
   const lastY = lastPanPosition.value.y
   const steps = Math.max(Math.abs(gridX - lastX), Math.abs(gridY - lastY))
@@ -160,9 +212,28 @@ function draw(event: MouseEvent) {
       interpolatedY < gridHeight &&
       gridData[interpolatedX]
     ) {
-      gridData[interpolatedX][interpolatedY] = isDrawing.value
-        ? '#000000'
-        : null
+      const size = cursorSize.value
+      for (let dx = -Math.floor(size / 2); dx <= Math.floor(size / 2); dx++) {
+        for (let dy = -Math.floor(size / 2); dy <= Math.floor(size / 2); dy++) {
+          const nx = interpolatedX + dx
+          const ny = interpolatedY + dy
+          if (
+            nx >= 0 &&
+            nx < gridWidth &&
+            ny >= 0 &&
+            ny < gridHeight &&
+            gridData[nx]
+          ) {
+            if (
+              cursorType.value === 'circle' &&
+              dx * dx + dy * dy > (size / 2) * (size / 2)
+            ) {
+              continue
+            }
+            gridData[nx][ny] = isDrawing.value ? '#000000' : null
+          }
+        }
+      }
     }
   }
 
@@ -269,5 +340,10 @@ canvas {
   display: block;
   background-color: #fff;
   cursor: crosshair;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
 }
 </style>
