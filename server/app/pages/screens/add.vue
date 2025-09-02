@@ -21,10 +21,16 @@
               class="p-2 border"
               min="1"
               max="50"
+              @keydown.enter.prevent
             />
           </label>
           <button
-            class="p-2 bg-gray-300 rounded flex items-center gap-2"
+            :class="[
+              'p-2 rounded flex items-center gap-2 hover:bg-gray-200',
+              {
+                'bg-gray-300 hover:bg-gray-400': cursorType === 'square',
+              },
+            ]"
             title="Square Cursor"
             type="button"
             @click="() => setCursorType('square')"
@@ -32,7 +38,12 @@
             <Icon name="mdi-square" />
           </button>
           <button
-            class="p-2 bg-gray-300 rounded flex items-center gap-2"
+            :class="[
+              'p-2 rounded flex items-center gap-2 hover:bg-gray-200',
+              {
+                'bg-gray-300 hover:bg-gray-400': cursorType === 'circle',
+              },
+            ]"
             title="Circle Cursor"
             type="button"
             @click="() => setCursorType('circle')"
