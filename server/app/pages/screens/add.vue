@@ -121,6 +121,24 @@
               <Icon name="mdi-format-letter-case" />
             </button>
           </div>
+          <div class="flex justify-end flex-grow pr-4">
+            <label class="ml-4">
+              <input
+                ref="imageInputRef"
+                type="file"
+                accept="image/*"
+                style="display: none"
+                @change="handleImageUpload"
+              />
+              <button
+                type="button"
+                class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                @click="() => imageInputRef?.click()"
+              >
+                Upload Image
+              </button>
+            </label>
+          </div>
         </div>
         <canvas ref="canvasRef" />
         <!-- Text input dialog -->
@@ -178,6 +196,8 @@ const currentTextInput = ref('')
 const textCanvasPosition = ref({ x: 0, y: 0 })
 // Removed unused textElements
 // Helper to convert canvas click to DOM position
+// Image upload ref
+const imageInputRef = ref<HTMLInputElement | null>(null)
 function getDomPositionFromCanvas(event: MouseEvent) {
   if (!canvasRef.value) return { x: 0, y: 0 }
   const rect = canvasRef.value.getBoundingClientRect()
@@ -276,7 +296,7 @@ function handleFontUpload(event: Event) {
 }
 
 const gridWidth = 250
-const gridHeight = 120
+const gridHeight = 122
 const zoomLevel = ref(1)
 const panOffset = ref({ x: 0, y: 0 })
 const isDrawing = ref(false)
@@ -285,8 +305,48 @@ const lastPanPosition = ref({ x: 0, y: 0 })
 const gridData: (string | null)[][] = Array.from({ length: gridWidth }, () =>
   Array(gridHeight).fill(null),
 )
+
+// Handle image upload and map to gridData
+function handleImageUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files.length > 0) {
+    const file = input.files[0]
+    const reader = new FileReader()
+    reader.onload = function (e) {
+      const img = new window.Image()
+      img.onload = function () {
+        // Draw image to offscreen canvas sized to grid
+        const offCanvas = document.createElement('canvas')
+        offCanvas.width = gridWidth
+        offCanvas.height = gridHeight
+        const ctx = offCanvas.getContext('2d')!
+        ctx.drawImage(img, 0, 0, gridWidth, gridHeight)
+        const imageData = ctx.getImageData(0, 0, gridWidth, gridHeight)
+        // Map image pixels to gridData (black for non-white, null for white)
+        for (let x = 0; x < gridWidth; x++) {
+          for (let y = 0; y < gridHeight; y++) {
+            const idx = (y * gridWidth + x) * 4
+            const r = imageData.data[idx]
+            const g = imageData.data[idx + 1]
+            const b = imageData.data[idx + 2]
+            const a = imageData.data[idx + 3]
+            // Treat as white if alpha is low or all rgb > 220
+            if (a < 128 || (r > 220 && g > 220 && b > 220)) {
+              gridData[x][y] = null
+            } else {
+              gridData[x][y] = '#000000'
+            }
+          }
+        }
+        drawCanvas()
+      }
+      img.src = e.target?.result as string
+    }
+    reader.readAsDataURL(file)
+  }
+}
 const cursorPosition = ref({ x: 0, y: 0 })
-const cursorSize = ref(5)
+const cursorSize = ref(1)
 const pencilType = ref<'square' | 'circle'>('square')
 const toolType = ref<'pencil' | 'text'>('pencil')
 
