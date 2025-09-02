@@ -1,13 +1,18 @@
 <template>
   <div>
     <h1 class="text-2xl mb-4">Add Screen</h1>
-    <form>
-      <input
-        name="name"
-        type="text"
-        placeholder="Screen Name"
-        class="mb-4 p-2 border"
-      />
+    <form @submit="onSubmit">
+      <label class="flex flex-col">
+        <span class="font-bold">Screen Name</span>
+        <input name="name" type="text" class="mb-4 p-2 border" />
+      </label>
+      <label class="flex flex-col mb-4">
+        <span class="font-bold">Screen Type</span>
+        <select v-model="screenType" name="type">
+          <option value="static">Static Image</option>
+          <option value="dynamic">Dynamic Image</option>
+        </select>
+      </label>
       <div
         ref="canvasContainerRef"
         class="w-full border relative overflow-hidden"
@@ -186,6 +191,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+
 // Font size state
 const fontSize = ref(10)
 // Text tool state
@@ -198,6 +204,9 @@ const textCanvasPosition = ref({ x: 0, y: 0 })
 // Helper to convert canvas click to DOM position
 // Image upload ref
 const imageInputRef = ref<HTMLInputElement | null>(null)
+
+const screenType = ref<'static' | 'dynamic'>('static')
+
 function getDomPositionFromCanvas(event: MouseEvent) {
   if (!canvasRef.value) return { x: 0, y: 0 }
   const rect = canvasRef.value.getBoundingClientRect()
@@ -631,6 +640,10 @@ function handleKeyDown(event: KeyboardEvent) {
     currentTextInput.value = ''
     drawCanvas()
   }
+}
+
+function onSubmit(event: Event) {
+  event.preventDefault()
 }
 
 onMounted(() => {
