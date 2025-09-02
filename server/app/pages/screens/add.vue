@@ -125,6 +125,20 @@
             >
               <Icon name="mdi-format-letter-case" />
             </button>
+            <button
+              v-if="screenType === 'dynamic'"
+              :class="[
+                'p-2 rounded flex items-center hover:bg-gray-200 w-8 h-8',
+                {
+                  'bg-gray-300 hover:bg-gray-400': toolType === 'text',
+                },
+              ]"
+              title="Add Metadata"
+              type="button"
+              @click="() => setToolType('metadata')"
+            >
+              <Icon name="mdi-database-plus" />
+            </button>
           </div>
           <div class="flex justify-end flex-grow pr-4">
             <label class="ml-4">
@@ -146,7 +160,23 @@
           </div>
         </div>
         <canvas ref="canvasRef" />
-        <!-- Text input dialog -->
+        <div
+          class="absolute right-0 top-[4.625rem] bottom-0 bg-white p-4 border-l overflow-y-auto max-w-80"
+        >
+          <span class="font-bold">Metadata</span>
+          <MetadataButton class="mt-4" />
+          <MetadataButton class="mt-4" />
+          <MetadataButton class="mt-4" />
+          <MetadataButton class="mt-4" />
+          <MetadataButton class="mt-4" />
+          <MetadataButton class="mt-4" />
+          <MetadataButton class="mt-4" />
+          <MetadataButton class="mt-4" />
+          <MetadataButton class="mt-4" />
+          <MetadataButton class="mt-4" />
+          <MetadataButton class="mt-4" />
+          <MetadataButton class="mt-4" />
+        </div>
         <div
           v-if="showTextDialog"
           :style="{
@@ -221,6 +251,28 @@ function handleCanvasClickForText(event: MouseEvent) {
   if (event.button !== 0) return
 
   if (toolType.value !== 'text') return
+  // Show dialog at click position
+  const domPos = getDomPositionFromCanvas(event)
+  textDialogPosition.value = domPos
+  // Save canvas coordinates for text placement
+  const canvasCoords = getCanvasCoordinates(event)
+  textCanvasPosition.value = {
+    x: Math.floor(canvasCoords.x / (canvasRef.value!.width / gridWidth)),
+    y: Math.floor(canvasCoords.y / (canvasRef.value!.height / gridHeight)),
+  }
+  currentTextInput.value = ''
+  showTextDialog.value = true
+  nextTick(() => {
+    textInputRef.value?.focus()
+  })
+}
+
+function handleCanvasClickForMetadata(event: MouseEvent) {
+  // skip anything except left clicks
+  if (event.button !== 0) return
+
+  if (toolType.value !== 'metadata') return
+
   // Show dialog at click position
   const domPos = getDomPositionFromCanvas(event)
   textDialogPosition.value = domPos
@@ -357,13 +409,13 @@ function handleImageUpload(event: Event) {
 const cursorPosition = ref({ x: 0, y: 0 })
 const cursorSize = ref(1)
 const pencilType = ref<'square' | 'circle'>('square')
-const toolType = ref<'pencil' | 'text'>('pencil')
+const toolType = ref<'pencil' | 'text' | 'metadata'>('pencil')
 
 function setPencilType(type: 'square' | 'circle') {
   pencilType.value = type
 }
 
-function setToolType(type: 'pencil' | 'text') {
+function setToolType(type: 'pencil' | 'text' | 'metadata') {
   toolType.value = type
 }
 
@@ -629,6 +681,8 @@ function preventContextMenu(event: MouseEvent) {
 function handleMouseDown(event: MouseEvent) {
   if (toolType.value === 'text') {
     handleCanvasClickForText(event)
+  } else if (toolType.value === 'metadata') {
+    handleCanvasClickForMetadata(event)
   } else {
     startDrawing(event)
   }
